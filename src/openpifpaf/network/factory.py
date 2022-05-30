@@ -31,6 +31,13 @@ if hasattr(torchvision.models, 'mobilenetv3') \
     torchvision.ops.misc.SqueezeExcitation.activation = torch.nn.ReLU()  # type: ignore
     torchvision.ops.misc.SqueezeExcitation.scale_activation = torch.nn.Hardsigmoid()  # type: ignore
 
+# monkey patch torchvision for mobilenetv3 checkpoint backwards compatibility
+if hasattr(torchvision.models, 'mobilenetv3') \
+   and not hasattr(torchvision.ops.misc.SqueezeExcitation, 'avgpool'):
+    torchvision.ops.misc.SqueezeExcitation.avgpool = torch.nn.AdaptiveAvgPool2d(1)
+    torchvision.ops.misc.SqueezeExcitation.activation = torch.nn.ReLU()
+    torchvision.ops.misc.SqueezeExcitation.scale_activation = torch.nn.Hardsigmoid()
+
 
 # generate hash values with: shasum -a 256 filename.pkl
 
