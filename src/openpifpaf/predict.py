@@ -71,6 +71,46 @@ def cli():
     return args
 
 
+def pbtrack_cli(): # for pbtrack integration
+    parser = argparse.ArgumentParser(
+        prog='python3 -m openpifpaf.predict',
+        usage='%(prog)s [options] images',
+        description=__doc__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument('--version', action='version',
+                        version='OpenPifPaf {version}'.format(version=__version__))
+
+    decoder.cli(parser)
+    logger.cli(parser)
+    network.Factory.cli(parser)
+    Predictor.cli(parser)
+
+    parser.add_argument('--json-output', default=None, nargs='?', const=True,
+                        help='Whether to output a json file, '
+                             'with the option to specify the output path or directory')
+    parser.add_argument('--disable-cuda', action='store_true',
+                        help='disable CUDA')
+    args = parser.parse_args()
+
+    logger.configure(args, LOG)  # logger first
+
+    # add args.device
+    args.device = torch.device('cpu')
+    args.pin_memory = False
+    if not args.disable_cuda and torch.cuda.is_available():
+        args.device = torch.device('cuda')
+        args.pin_memory = True
+    LOG.info('neural network device: %s (CUDA available: %s, count: %d)',
+             args.device, torch.cuda.is_available(), torch.cuda.device_count())
+
+    decoder.configure(args)
+    network.Factory.configure(args)
+    Predictor.configure(args)
+
+    return args
+
+
 def out_name(arg, in_name, default_extension):
     """Determine an output name from args, input name and extension.
 

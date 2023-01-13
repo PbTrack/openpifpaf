@@ -23,6 +23,7 @@ from . import network
 from . import optimize
 from . import plugin
 from . import visualizer
+from . import predict # for pbtrack integration
 
 from .datasets import DATAMODULES
 from .decoder import DECODERS
