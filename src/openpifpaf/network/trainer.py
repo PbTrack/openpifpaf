@@ -159,8 +159,10 @@ class Trainer():
 
             if (epoch + 1) % self.val_interval == 0 \
                or epoch + 1 == self.epochs:
-                self.write_model(epoch + 1, epoch + 1 == self.epochs)
+                final_filename = self.write_model(epoch + 1, epoch + 1 == self.epochs)
                 self.val(val_scenes, epoch + 1)
+                
+        return final_filename
 
     # pylint: disable=method-hidden,too-many-branches,too-many-statements
     def train_batch(self, data, targets, apply_gradients=True):
@@ -420,6 +422,6 @@ class Trainer():
                 for byte_block in iter(lambda: f.read(8192), b''):
                     sha256_hash.update(byte_block)
             file_hash = sha256_hash.hexdigest()
-            outname, _, outext = self.out.rpartition('.')
-            final_filename = '{}-{}.{}'.format(outname, file_hash[:8], outext)
+            final_filename = '{}.{}'.format(self.out, file_hash[:8])
             shutil.copyfile(filename, final_filename)
+            return final_filename

@@ -198,7 +198,8 @@ def main():
             'hostname': socket.gethostname(),
         },
     )
-    trainer.loop(train_loader, val_loader, start_epoch=start_epoch)
+    filename = trainer.loop(train_loader, val_loader, start_epoch=start_epoch)
+    return filename
 
 
 if __name__ == '__main__':
