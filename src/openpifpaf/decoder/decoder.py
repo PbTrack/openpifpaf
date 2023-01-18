@@ -134,7 +134,7 @@ class Decoder:
         LOG.debug('time: nn = %.1fms, dec = %.1fms',
                   self.last_nn_time * 1000.0,
                   self.last_decoder_time * 1000.0)
-        return result
+        return result, fields_batch
 
     def _mappable_annotations(self, fields, debug_image, gt_anns):
         if debug_image is not None:
