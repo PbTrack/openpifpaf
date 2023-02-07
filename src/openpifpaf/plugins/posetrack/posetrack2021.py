@@ -1,5 +1,6 @@
 import argparse
 
+import PIL
 import torch
 
 import openpifpaf
@@ -38,6 +39,7 @@ class Posetrack2021(openpifpaf.datasets.DataModule):
     upsample_stride = 1
     min_kp_anns = 1
     bmin = 0.1
+    image_aug = 0.0
 
     def __init__(self):
         super().__init__()
@@ -158,6 +160,12 @@ class Posetrack2021(openpifpaf.datasets.DataModule):
         group.add_argument(
             "--posetrack2021-bmin", default=cls.bmin, type=float, help="bmin"
         )
+        group.add_argument(
+            "--posetrack2021-image-augmentations",
+            default=cls.image_aug,
+            type=float,
+            help="autocontrast, equalize, invert, solarize",
+        )
 
     @classmethod
     def configure(cls, args: argparse.Namespace):
@@ -181,6 +189,7 @@ class Posetrack2021(openpifpaf.datasets.DataModule):
         cls.upsample_stride = args.posetrack2021_upsample
         cls.min_kp_anns = args.posetrack2021_min_kp_anns
         cls.bmin = args.posetrack2021_bmin
+        cls.image_aug = args.posetrack2021_image_augmentations
 
     def _preprocess(self):
         encoders = [
@@ -238,6 +247,20 @@ class Posetrack2021(openpifpaf.datasets.DataModule):
                     self.square_edge, use_area_of_interest=True
                 ),
                 openpifpaf.transforms.CenterPad(self.square_edge),
+                openpifpaf.transforms.RandomChoice(
+                    [
+                        openpifpaf.transforms.ImageTransform(PIL.ImageOps.autocontrast),
+                        openpifpaf.transforms.ImageTransform(PIL.ImageOps.equalize),
+                        openpifpaf.transforms.ImageTransform(PIL.ImageOps.invert),
+                        openpifpaf.transforms.ImageTransform(PIL.ImageOps.solarize),
+                    ],
+                    [
+                        self.image_aug / 4,
+                        self.image_aug / 4,
+                        self.image_aug / 4,
+                        self.image_aug / 4,
+                    ],
+                ),
                 openpifpaf.transforms.TRAIN_TRANSFORM,
                 openpifpaf.transforms.Encoders(encoders),
             ]
